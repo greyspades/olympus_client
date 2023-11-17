@@ -39,7 +39,8 @@ interface CustomInputProps {
   fitWidth?: true;
   required?: true;
   endAdornment?: true;
-  maxLength?: number
+  maxLength?: number;
+  name?: string
 }
 
 export const CustomInput = ({
@@ -61,7 +62,8 @@ export const CustomInput = ({
   fitWidth,
   required,
   endAdornment,
-  maxLength
+  maxLength,
+  name
 }: CustomInputProps) => {
   const [focussed, setFocussed] = useState<boolean>(false);
 
@@ -86,6 +88,7 @@ export const CustomInput = ({
       </InputLabel>
       {component == "text" && (
         <Input
+          name={name}
           disabled={disabled ?? false}
           value={value}
           placeholder={placeHolder}
@@ -118,6 +121,7 @@ export const CustomInput = ({
       )}
       {component == "field" && (
         <TextField
+          name={name}
           variant="filled"
           value={value}
           onChange={(e: any) => onChange(e)}
@@ -162,6 +166,7 @@ export const CustomInput = ({
               borderColor: "green",
             },
           }}
+          name={name}
           className={classes}
           value={value}
           onChange={(e: any) => onChange(e)}

@@ -23,6 +23,11 @@ export const Notifier = ({
   code,
 }: NotifierProps) => {
     const { notifierState, notifierDispatch } = useContext(NotifierContext);
+    
+    const handleNext = () => {
+      next?.action()
+      notifierDispatch({type: "CLOSE", payload: null})
+    }
   return (
     <div>
       <Modal open={open} className="flex justify-center">
@@ -43,7 +48,7 @@ export const Notifier = ({
                 Cancel
             </Button>
           {next && (
-            <Button onClick={() => next?.action()} className="text-white bg-green-700 h-[30px] capitalize">
+            <Button onClick={handleNext} className="text-white bg-green-700 h-[30px] capitalize">
                 {next?.title}
             </Button>
           )}

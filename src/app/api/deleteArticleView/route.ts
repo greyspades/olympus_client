@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import Axios from "axios";
+import Axios, { AxiosError } from "axios";
 import CryptoJS from "crypto-js";
 import { NextRequest, NextResponse } from "next/server";
 // import formidable from 'express-formidable';
@@ -40,34 +40,23 @@ const urls: UrlData[] = [
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
+    const headers = request.headers.get("authorization")
+    const response = await Axios.post(process.env.DELETE_ARTICLE, body, {
+      headers: {
+          "Content-Type": "application/json",
+          "Authorization" : headers
+      }
+  })
+  .then((res) => {
+      return res.data
+  })
+  .catch((err: AxiosError) => {
+      console.log(err.message)
+  })
+    console.log(response)
 
-    const reqUrl: string = urls.find((item: UrlData) => item.code === body.url).url
-    // const formData = await request.formData()
-    console.log(body)
-    console.log(reqUrl)
-    // console.log(formData)
-    // console.log(request.body)
-    // console.log(formData)
-    // console.log(reqUrl)
-
-    // const response = await fetch(reqUrl, {
-    //   method: request.body.method,      
-    //   headers: {
-    //     Auth: reqToken
-    //   },
-    // }).then((res) => {
-    //     if(res.ok) {
-    //         return res.json()
-    //     }
-    // })
-    // console.log(response)
-
-    // return new Response(response)
-
-    return NextResponse.json(JSON.stringify({}))
+    return NextResponse.json(response)
   } catch (error) {
     console.log(error)
   }
 }
-
-export {}

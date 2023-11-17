@@ -11,11 +11,8 @@ interface PreviewInterface {
 export const Preview = ({close, slide}: PreviewInterface) => {
     const {state, dispatch} = useContext(ComponentContext)
 
-    // useEffect(() => {
-    //     console.log(slide)
-    // },[])
     const closePreview = () => {
-        dispatch({type: "PREVIEW", payload: {index: 1, title: "slider"}})
+        // dispatch({type: "PREVIEW", payload: {index: "", title: "slider"}})
         close()
     }
 
@@ -23,7 +20,7 @@ export const Preview = ({close, slide}: PreviewInterface) => {
         if(slide?.image) {
             return <img className='h-[600px] w-[100%]' src={URL.createObjectURL(slide?.image)} />
         } else {
-            return <img className='h-[600px] w-[100%]' src={`http://localhost:5078/api/Slider/image/${slide?.id}`} alt="/" />
+            return <img className='h-[600px] w-[100%]' src={`${process.env.NEXT_PUBLIC_GET_SLIDER_IMAGE}/${slide?.id}`} alt="/" />
         }
     }
 

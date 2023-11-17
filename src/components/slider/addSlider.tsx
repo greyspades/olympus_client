@@ -13,7 +13,8 @@ import { NotifierContext } from "@/context/notifier.context";
 import { ComponentContext } from "@/context/component.context";
 import { AddSliderValidation } from "@/helpers/validation";
 import { Preview } from "./preview";
-
+import api from "@/helpers/axiosConnector";
+import server from "@/helpers/serverConnector";
 
 
 type Slide = {
@@ -109,6 +110,7 @@ export const AddSlider = () => {
       let file: File = e.target.files[0];
       let fileType = file.name.split(".");
       let fileSize = file.size;
+      console.log(fileType[fileType.length - 1])
       if (
         allowedExtensions.includes(fileType[fileType.length - 1]) &&
         fileSize <= 500000
@@ -117,18 +119,11 @@ export const AddSlider = () => {
         const bytes = new Uint8Array(buffer);
         let update = { ...slide, image: file };
         setSlide(update);
-        // resizedImage.toBlob((blob: BlobPart) => {
-        //     // Convert Blob to File with a name
-        //     const resizedImage = new File([blob], 'resized_image.jpg', {
-        //       type: 'image/jpeg',
-        //     });
-
-        //     setResizedImageFile(resizedImage);
-        //   }, 'image/jpeg');
         setImage(URL.createObjectURL(file));
+        // console.log(URL.createObjectURL(file))
         setError({ ...error, image: "" });
       } else if (!allowedExtensions.includes(fileType[fileType.length - 1])) {
-        setError({ ...error, image: "Please select a png, jpg or jpeg file" });
+        setError({ ...error, image: "Please select a jpg file" });
       } else if (!(fileSize <= 500000)) {
         setError({
           ...error,
@@ -149,8 +144,8 @@ export const AddSlider = () => {
   }
 
   const togglePreview = () => {
-    dispatch({type: "PREVIEW", payload: {index: 1, slide: {...slide, actionBtn}, title: "preview"}})
-    console.log(slide)
+    // dispatch({type: "PREVIEW", payload: {index: "0.3", slide: {...slide, actionBtn}, title: "preview"}})
+    // console.log(slide)
     if(slide != null) {
       setPreview((state) => !state)
     }
@@ -170,12 +165,12 @@ export const AddSlider = () => {
     AddSliderValidation.validate(body, { abortEarly: false }) // abortEarly: false will return all validation errors
       .then((validatedData) => {
         delete body["sameImage"];
-        axios
+        server
           .post(
             state?.title != "EDIT"
-              ? process.env.NEXT_PUBLIC_CREATE_SLIDER
+              ? "/createSlide"
               // ? "http://192.168.1.28:8035/api/Slider"
-              : process.env.NEXT_PUBLIC_UPDATE_SLIDER,
+              : "/editSlide",
               // : "http://192.168.1.28:8035/api/Slider/update",
             body,
             {
@@ -195,7 +190,7 @@ export const AddSlider = () => {
                   open: true,
                 },
               });
-              dispatch({ type: "SWITCH_INDEX", payload: { index: 0 } });
+              dispatch({ type: "SWITCH_INDEX", payload: { index: "1.0" } });
             } else {
               notifierDispatch({
                 type: "CREATE",
@@ -287,7 +282,7 @@ export const AddSlider = () => {
           {
             state?.title == "EDIT" && (
               <FormControl className="flex flex-row place-items-center">
-              <InputLabel>Use Same Image?</InputLabel>
+              <InputLabel>Retain current image?</InputLabel>
               <Switch
                 className="text-green-700"
                 checked={sameImage}
@@ -367,7 +362,8 @@ export const AddSlider = () => {
             {(image || state?.title == "EDIT") && (
               <img
                 src={
-                  image ?? `data:image/jpeg;base64,${state?.slide?.imageBytes}`
+                  image ?? `http://localhost:5078/api/Slider/image/${state.slide.id}`
+                  // `http://localhost:5078/api/Slider/image/${state?.slide?.id}`
                 }
                 className="h-[545.06px] w-[708.67px]"
               />

@@ -40,34 +40,25 @@ const urls: UrlData[] = [
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
+    // console.log(body)
 
-    const reqUrl: string = urls.find((item: UrlData) => item.code === body.url).url
-    // const formData = await request.formData()
-    console.log(body)
-    console.log(reqUrl)
-    // console.log(formData)
-    // console.log(request.body)
-    // console.log(formData)
-    // console.log(reqUrl)
-
-    // const response = await fetch(reqUrl, {
-    //   method: request.body.method,      
-    //   headers: {
-    //     Auth: reqToken
-    //   },
-    // }).then((res) => {
-    //     if(res.ok) {
-    //         return res.json()
-    //     }
-    // })
+    const response = await fetch(process.env.GET_ALL_ARTICLE_VIEWS, {
+      method: "POST",      
+      headers: {
+        Auth: reqToken,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(body)
+    }).then(async(res: any) => {
+        // console.log(await res.json())
+        if(res.ok) {
+            return await res.json()
+        }
+    })
     // console.log(response)
 
-    // return new Response(response)
-
-    return NextResponse.json(JSON.stringify({}))
+    return NextResponse.json(response)
   } catch (error) {
     console.log(error)
   }
 }
-
-export {}

@@ -36,38 +36,25 @@ const urls: UrlData[] = [
     //   url: process.env.NEXT_PUBLIC_CREATE_ARTICLE_VIEW
     // }
 ]
+export const dynamic = 'force-dynamic'
 
-export async function POST(request: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
-    const body = await request.json()
-
-    const reqUrl: string = urls.find((item: UrlData) => item.code === body.url).url
-    // const formData = await request.formData()
-    console.log(body)
-    console.log(reqUrl)
-    // console.log(formData)
-    // console.log(request.body)
-    // console.log(formData)
-    // console.log(reqUrl)
-
-    // const response = await fetch(reqUrl, {
-    //   method: request.body.method,      
-    //   headers: {
-    //     Auth: reqToken
-    //   },
-    // }).then((res) => {
-    //     if(res.ok) {
-    //         return res.json()
-    //     }
-    // })
-    // console.log(response)
-
-    // return new Response(response)
-
-    return NextResponse.json(JSON.stringify({}))
+    const headers = request.headers.get("authorization")
+    const response = await fetch(process.env.GET_ARTICLES, {
+      method: "GET",   
+      headers: {
+        Auth: reqToken,
+        "Content-Type": "application/json",
+        "Authorization" : headers
+      },
+    }).then(async(res: any) => {
+        if(res.ok) {
+            return await res.json()
+        }
+    })
+    return NextResponse.json(response)
   } catch (error) {
     console.log(error)
   }
 }
-
-export {}

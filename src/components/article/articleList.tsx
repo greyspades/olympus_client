@@ -6,6 +6,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import { NotifierContext } from '@/context/notifier.context';
 import { ComponentContext } from '@/context/component.context';
+import server from '@/helpers/serverConnector';
 
 
 export const ArticleList = () => {
@@ -16,8 +17,8 @@ export const ArticleList = () => {
   const { notifierState, notifierDispatch } = useContext(NotifierContext);
 
   const getArticles = () => {
-    axios.get(
-      process.env.NEXT_PUBLIC_GET_ARTICLES
+    server.get(
+      "/getArticles"
       // "http://192.168.1.28:8035/api/Article"
       )
     .then((res: AxiosResponse) => {
@@ -26,7 +27,7 @@ export const ArticleList = () => {
       if(res.data.code == 200 && res.data.data.section1) {
         const data = res.data.data
         setArticles(res.data.data)
-        dispatch({type: "SET_ARTICLES", payload: { articles: {section1: data.section1, section2: data.section2, section3: data.section3}, index: 1}})
+        dispatch({type: "SET_ARTICLES", payload: { articles: {section1: data.section1, section2: data.section2, section3: data.section3}, index: "1.2.2"}})
       }
     })
     .catch((err: AxiosError) => {
@@ -79,6 +80,7 @@ export const ArticleList = () => {
   return (
     <div>
       <Divider className='bg-green-700 h-[2px] my-4' />
+      <Skeleton />
         {/* {state?.articles && (
           <Skeleton />
         )} */}

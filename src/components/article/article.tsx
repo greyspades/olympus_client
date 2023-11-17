@@ -16,24 +16,21 @@ export const Articles = () => {
 
   const { state, dispatch } = useContext(ComponentContext);
 
-  const switchComponent = (idx: number) => {
+  const switchComponent = (idx: string) => {
     dispatch({type: "SWITCH_INDEX", payload: {index: idx, title: "article"}})
   };
 
-  useEffect(() => {
-    // console.log(state)
-  },[])
-
   const renderComponent = () => {
     switch (state.index) {
-      case 0:
+      case "1.2.1":
         return <ArticleList />;
-      case 1:
+      case "1.2.2":
         return <Skeleton />;
-      case 2:
+      case "0.2":
         return <AddArticle />;
       default:
-        return <SliderList />;
+        // return <SliderList />;
+        return <AddArticle />
     }
   };
 
@@ -44,19 +41,20 @@ export const Articles = () => {
   return (
     <div className="p-4">
         <div className="flex flex-row justify-between">
-          {state?.index == 0 && (
-            <IconButton onClick={() => switchComponent(1)} className="">
+          {state?.index == "1.2.2" && (
+            <IconButton onClick={() => switchComponent("0.2")} className="">
             New Article
             <AddIcon />
           </IconButton>
           )}
-          {state?.index != 0 && (
-            <IconButton onClick={() => switchComponent(0)} className="">
+          {state?.index != "1.2.2" && (
+            <IconButton onClick={() => switchComponent("1.2.1")} className="">
             <ArrowBackIcon />
           </IconButton>
           )}
         </div>
         <div>{renderComponent()}</div>
+        <AddArticle />
     </div>
   );
 };

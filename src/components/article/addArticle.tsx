@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import { Button, Paper, Switch } from "@mui/material";
 import { EditorState, ContentState } from "draft-js";
 // import { Editor } from "react-draft-wysiwyg";
-import { convertToHTML, stateToText, convertFromHTML } from "draft-convert";
+import { convertToHTML  } from "draft-convert";
 import { CustomInput } from "../shared/customInput";
 import { Article } from "./types";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
@@ -12,7 +12,7 @@ import { NotifierContext } from "@/context/notifier.context";
 import axios, { AxiosError, AxiosResponse } from "axios";
 import { ComponentContext } from "@/context/component.context";
 import htmlToDraft from 'html-to-draftjs';
-
+import server from "@/helpers/serverConnector";
 
 
 const Editor = dynamic(() => import("react-draft-wysiwyg").then((mod) => mod.Editor), {
@@ -21,10 +21,18 @@ const Editor = dynamic(() => import("react-draft-wysiwyg").then((mod) => mod.Edi
 
 export const AddArticle = () => {
   const { state, dispatch } = useContext(ComponentContext);
+  const convertHtmlToPlainText = (html: string) => {
+    const doc = new DOMParser().parseFromString(html, "text/html");
+    return doc.body.textContent || "";
+  };
+
   const convertPlainTextToEditorState = (plainText: string) => {
-    if(plainText) {
-      const contentState = ContentState.createFromText(plainText);
-    return EditorState.createWithContent(contentState);
+    if (plainText) {
+      const contentState = ContentState.createFromText(
+        convertHtmlToPlainText(plainText)
+        // plainText
+      );
+      return EditorState.createWithContent(contentState);
     }
   };
 
@@ -125,28 +133,23 @@ export const AddArticle = () => {
         ...article,
         sameImage
     };
-    console.log("submiting")
-    console.log(state.title)
     
     if(state?.title != "EDIT") {
       if(state.meta == "SEC1") {
-        dispatch({type: "SWITCH_ARTICLE_1", payload: {articles: {section1: { ...article, section: state?.meta }}, index: 1, title: "article"}})
+        dispatch({type: "SWITCH_ARTICLE_1", payload: {articles: {section1: { ...article, section: state?.meta }}, index: "1.2.2", title: "article"}})
       } else  if(state.meta == "SEC2") {
-        dispatch({type: "SWITCH_ARTICLE_2", payload: {articles: {section2: { ...article, section: state?.meta }}, index: 1, title: "article"}})
+        dispatch({type: "SWITCH_ARTICLE_2", payload: {articles: {section2: { ...article, section: state?.meta }}, index: "1.2.2", title: "article"}})
       } else  if(state.meta == "SEC3") {
-        dispatch({type: "SWITCH_ARTICLE_3", payload: {articles: {section3: { ...article, section: state?.meta }}, index: 1, title: "article"}})
+        dispatch({type: "SWITCH_ARTICLE_3", payload: {articles: {section3: { ...article, section: state?.meta }}, index: "1.2.2", title: "article"}})
       }
       // console.log(state.articles)
     } else {
       AddArticleValidation.validate(body, { abortEarly: false })
     .then((validBody) => {
-        console.log("is valid")
-        console.log(body)
         delete validBody["sameImage"];
-        axios
+        server
         .post(
-          // process.env.NEXT_PUBLIC_UPDATE_ARTICLE,
-          "http://localhost:5078/api/Article/update",
+          "/editArticle",
           // "http://192.168.1.28:8035/api/Article/update",
           validBody,
           {
@@ -166,7 +169,7 @@ export const AddArticle = () => {
                 open: true,
               },
             });
-            dispatch({type: "SWITCH_INDEX", payload: {index: 1, title: "article", meta: null}})
+            dispatch({type: "SWITCH_INDEX", payload: {index: "1.2.1", title: "article", meta: null}})
           } else {
             notifierDispatch({
               type: "CREATE",
@@ -222,15 +225,15 @@ export const AddArticle = () => {
     }
     if(state.meta == "SEC1") {
       let update = {...state.articles, section1: { ...state.articles.section1, [field]: value}}
-      dispatch({type: "ARTICLE_CHANGE", payload: {index: 2, articles: update, meta: state.meta, title: "EDIT"}})
+      dispatch({type: "ARTICLE_CHANGE", payload: {index: "0.2", articles: update, meta: state.meta, title: "EDIT"}})
     }
     if(state.meta == "SEC2") {
       let update = {...state.articles, section2: { ...state.articles.section2, [field]: value}}
-      dispatch({type: "ARTICLE_CHANGE", payload: {index: 2, articles: update, meta: state.meta, title: "EDIT"}})
+      dispatch({type: "ARTICLE_CHANGE", payload: {index: "0.2", articles: update, meta: state.meta, title: "EDIT"}})
     }
     if(state.meta == "SEC3") {
       let update = {...state.articles, section3: { ...state.articles.section3, [field]: value}}
-      dispatch({type: "ARTICLE_CHANGE", payload: {index: 2, articles: update, meta: state.meta, title: "EDIT"}})
+      dispatch({type: "ARTICLE_CHANGE", payload: {index: "0.2", articles: update, meta: state.meta, title: "EDIT"}})
     }
   }
 
@@ -289,7 +292,7 @@ export const AddArticle = () => {
             <div className="border-dashed border-2 w-[500px] h-[500px] mt-[20px] relative">
               {(previewImage || getSection()?.id) && (
                 <img
-                  src={previewImage ?? `http://localhost:5078/api/Article/image/${getSection().id}`}
+                  src={previewImage ?? `${process.env.NEXT_PUBLIC_GET_ARTICLE_IMAGE}/${getSection().id}`}
                   className="w-[500px] h-[300px]"
                   alt="/"
                 />
@@ -299,19 +302,19 @@ export const AddArticle = () => {
                 <p className="text-[35px] capitalize font-semibold break-all">{article?.header}</p>
               </div>
 
-              <div><p>{convertedContent}</p></div>
+              <div className="break-words"><p>{convertedContent}</p></div>
             </div>
           </div>
 
-          <div className="shadow-md">
+          <div className="shadow-md break-words w-[48vw]">
             <p className="text-[12px]">
                 Article content
             </p>
             <Editor
               editorState={editorState}
               onEditorStateChange={setEditorState}
-              wrapperClassName="h-[85%]"
-              editorClassName="bg-gray-100 p-4"
+              wrapperClassName="h-[85%] break-words"
+              editorClassName="bg-gray-100 p-4 break-words"
               toolbarClassName="toolbar-class"
             />
           </div>

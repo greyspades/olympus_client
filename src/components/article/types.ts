@@ -8,5 +8,9 @@ export type Article = {
     creationDate?: string,
     title: string,
     imageBytes?: string,
+    sameImage?: boolean,
+    avatar?: any,
+    author?: string,
+    uname?: string,
     section?: "SEC1" | "SEC2" | "SEC3"
 }

@@ -9,6 +9,8 @@ import AddIcon from "@mui/icons-material/Add";
 import { ComponentContext } from "@/context/component.context";
 import { NotifierContext } from "@/context/notifier.context";
 import { getAsync } from "@/helpers/connector";
+import api from "@/helpers/axiosConnector";
+import server from "@/helpers/serverConnector";
 
 export const SliderList = () => {
   const [slides, setSlides] = useState<Slide[]>();
@@ -19,20 +21,17 @@ export const SliderList = () => {
 
   const { notifierState, notifierDispatch } = useContext(NotifierContext);
 
-  const getSlides = () => {
-    axios
-      .get(
-        process.env.NEXT_PUBLIC_GET_SLIDERS
-        // "http://192.168.1.28:8035/api/Slider"
-        )
-      .then((res: AxiosResponse) => {
-        if (res.data.code == 200) {
-          setSlides(res.data.data);
-        }
-      })
-      .catch((err: AxiosError) => {
-        console.log(err.message);
-      });
+  const getSlides = async() => {
+    await server.get("/getAllSlides")
+    .then((res: AxiosResponse) => {
+      if (res.data.code == 200) {
+        setSlides(res.data.data);
+      }
+    })
+    .catch((err: AxiosError) => {
+      console.log(err.message);
+    });
+    
   };
 
   useEffect(() => {
@@ -42,7 +41,7 @@ export const SliderList = () => {
   const handleEdit = (slide: Slide) => {
     dispatch({
       type: "EDIT_SLIDE",
-      payload: { index: 1, slide: slide, title: "EDIT" },
+      payload: { index: "1.1.2", slide: slide, title: "EDIT" },
     });
   };
 
@@ -50,8 +49,9 @@ export const SliderList = () => {
     let body = {
       id,
     };
-    axios
-      .post("http://localhost:5078/api/Slider/delete", body)
+    console.log(id)
+    server
+      .post("/deleteSlide", body)
       .then((res: AxiosResponse) => {
         console.log(res.data);
         if (res.data.code == 200) {
@@ -94,7 +94,7 @@ export const SliderList = () => {
           </p>
         </div>
         <img
-          src={`http://localhost:5078/api/Slider/image/${item?.id}`}
+          src={`${process.env.NEXT_PUBLIC_GET_SLIDER_IMAGE}/${item?.id}`}
           className="w-[200px] h-[130px] ml-auto"
           alt="/"
         />
@@ -139,6 +139,9 @@ export const SliderList = () => {
   return (
     <Paper className="p-4 h-[80vh] overflow-y-scroll">
       {/* {!editing ? renderSlides() : <AddSlider isEdit={true} slideEdit={slideToEdit} />} */}
+      <div>
+        <p className="text-2xl font-medium">Created slides</p>
+      </div>
       {renderSlides()}
     </Paper>
   );
